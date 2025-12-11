@@ -1,7 +1,6 @@
 from pyrogram.handlers import MessageHandler, CallbackQueryHandler
 from pyrogram import filters
 
-from .. import LOGGER
 from .EchoClient import EchoBot
 from ..plugins.poster import _poster_cmd
 from ..plugins.broadcast import _broadcast
