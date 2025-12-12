@@ -6,9 +6,17 @@ Powerful telegram bot that scrape Posters from multiple OTT platforms & Bypass d
 <summary><strong>DDL Bypass Sites</strong></summary>
 
 - Gdflix
+- Extraflix 
 - Hubdrive
 - Hubcloud
-- Transfer.it
+- Hubcdn
+- Transfer-it
+- Driveleech
+- Neolinks
+- GDRex
+- PixelCDN
+- ExtraLink
+- LuxDrive
 
 </details>
 
