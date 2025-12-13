@@ -1,7 +1,9 @@
 from pyrogram import Client
 from pyrogram.enums import ParseMode
 from asyncio import Lock
+from inspect import signature
 from logging import getLogger
+
 from config import Config
 
 LOGGER = getLogger(__name__)
@@ -15,22 +17,38 @@ class EchoBot:
     USERNAME = ""
 
     @classmethod
+    def echoClient(cls, *args, **kwargs):
+        kwargs["api_id"] = Config.API_ID
+        kwargs["api_hash"] = Config.API_HASH
+        kwargs["parse_mode"] = ParseMode.HTML
+        kwargs["in_memory"] = True
+
+        for param, value in {
+            "skip_updates": False,
+        }.items():
+            if param in signature(Client.__init__).parameters:
+                kwargs[param] = value
+
+        return Client(*args, **kwargs)
+
+    @classmethod
     async def start(cls):
         async with cls._lock:
-            LOGGER.info("Starting EchoBot client")
-            cls.bot = Client(
+            LOGGER.info("Creating EchoBot client")
+
+            cls.bot = cls.echoClient(
                 "EchoBotz",
-                api_id=Config.API_ID,
-                api_hash=Config.API_HASH,
                 bot_token=Config.BOT_TOKEN,
                 workers=100,
-                parse_mode=ParseMode.HTML,
             )
+
             await cls.bot.start()
+
             me = cls.bot.me
             cls.ID = me.id
             cls.USERNAME = me.username
-            LOGGER.info(f"EchoBot started as @{cls.USERNAME}")
+
+            LOGGER.info(f"EchoBot @{cls.USERNAME} Started")
 
     @classmethod
     async def stop(cls):
