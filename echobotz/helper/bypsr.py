@@ -94,6 +94,16 @@ class EchoBypass:
 
         root = data.get("final") or data
 
+        direct = root.get("url")
+        if isinstance(direct, str) and direct.startswith(("http://", "https://")):
+            return {
+                "title": root.get("file_name") or "N/A",
+                "filesize": root.get("file_size") or "N/A",
+                "format": "N/A",
+                "links": {"Direct Link": direct},
+                "service": self.key
+            }, None
+
         title = (
             root.get("title")
             or root.get("file_name")
@@ -116,7 +126,7 @@ class EchoBypass:
             "links": links,
             "service": self.key
         }, None
-
+        
 def _xlnk(root):
     out = {}
 
