@@ -39,12 +39,9 @@ _BYPASS_CMD_TO_SERVICE = {
 }
 
 _BYPASS_ENDPOINTS = {
-    # By : Hgbots
     "gdflix": "https://hgbots.vercel.app/bypaas/gd.php?url=",
     "hubdrive": "https://hgbots.vercel.app/bypaas/hubdrive.php?url=",  
-   # By : NickUpdates 
     "transfer_it": "https://transfer-it-henna.vercel.app/post",
-    # By: PBX1 
     "hubcloud": "https://pbx1botapi.vercel.app/api/hubcloud?url=",
     "vcloud": "https://pbx1botapi.vercel.app/api/vcloud?url=",
     "hubcdn": "https://pbx1botapi.vercel.app/api/hubcdn?url=",
@@ -64,7 +61,6 @@ def _bp_srv(cmd):
     cmd = cmd.lower().lstrip("/")
     return _BYPASS_CMD_TO_SERVICE.get(cmd)
 
-
 def _bp_label_from_key(key):
     mapping = {
         "instant_final": "Instant",
@@ -77,7 +73,6 @@ def _bp_label_from_key(key):
     if key in mapping:
         return mapping[key]
     return key.replace("_", " ").title()
-
 
 def _bp_label_from_name(name):
     s = str(name).strip()
@@ -93,13 +88,35 @@ def _bp_label_from_name(name):
         return s[8:].strip() or s
     return s
 
+def _pack_results_html(results, page=1, per_page=10):
+    total = len(results)
+    max_page = (total - 1) // per_page + 1
+    page = max(1, min(page, max_page))
+    start = (page - 1) * per_page
+    end = min(total, page * per_page)
+    out = []
+    for i, item in enumerate(results[start:end], start=1+start):
+        name = item.get("file_name") or "File"
+        sz = item.get("file_size") or "N/A"
+        src = item.get("source") or ""
+        out.append(f"<b>{i}. {name}</b> <code>({sz})</code>")
+        links = item.get("links") or []
+        for li in links:
+            typ = li.get("type") or "Link"
+            url = li.get("url")
+            if not isinstance(url, str) or not url.startswith(("http://", "https://")):
+                continue
+            out.append(f'   ╞ <b>{typ}</b>: <a href="{url}">Click Here</a>')
+        out.append("")
+    txt = "\n".join(out).strip()
+    nav = f"<i>Showing {start+1}-{end} of {total} files</i>"
+    return (txt, nav, page, max_page)
+
 def _bp_links(links):
     if not isinstance(links, dict) or not links:
         return "╰╴ No direct links found."
-
     grouped = any("|" in str(k) for k in links)
     out = []
-
     if not grouped:
         items = [
             (str(k).strip() or "Link", v.strip())
@@ -111,7 +128,6 @@ def _bp_links(links):
                 f"{'╰╴' if i == len(items)-1 else '╞╴'} <b>{k}:</b> <a href=\"{v}\">Click Here</a>"
             )
         return "\n".join(out) if out else "╰╴ No direct links found."
-
     groups = {}
     for k, v in links.items():
         if not isinstance(v, str):
@@ -121,21 +137,25 @@ def _bp_links(links):
             continue
         a, b = str(k).split("|", 1)
         groups.setdefault(a.strip(), []).append((b.strip(), u))
-
     for g, items in groups.items():
         out.append(f"\n<b>{g}</b>")
         for i, (k, v) in enumerate(items):
             out.append(
                 f"{'╰╴' if i == len(items)-1 else '╞╴'} <b>{k}:</b> <a href=\"{v}\">Click Here</a>"
             )
-
     return "\n".join(out).strip()
 
 def _bp_norm(data, service):
+    if service == "hubcloud" and data.get("pack") and isinstance(data.get("results"), list):
+        return {
+            "hc_pack_results": data.get("results", []),
+            "hc_pack": True,
+            "total_files": data.get("total_files", len(data.get("results", []))),
+            "service": service,
+        }
     root = data
     if isinstance(data, dict) and isinstance(data.get("final"), dict):
         root = data["final"]
-
     title = root.get("title") or data.get("title") or root.get("file_name") or data.get("file_name") or "N/A"
     filesize = root.get("filesize") or data.get("filesize") or root.get("file_size") or data.get("file_size") or "N/A"
     file_format = (
@@ -145,7 +165,6 @@ def _bp_norm(data, service):
         or data.get("file_format")
         or "N/A"
     )
-
     links_clean = {}
     raw_links = None
     if isinstance(root, dict) and "links" in root:
@@ -240,7 +259,6 @@ def _bp_norm(data, service):
                 if not u.startswith(("http://", "https://")):
                     continue
                 links_clean[lbl] = u
-
     return {
         "title": str(title),
         "filesize": str(filesize),
@@ -253,7 +271,6 @@ async def _bp_info(cmd_name, target_url):
     service = _bp_srv(cmd_name)
     if not service:
         return None, "Unknown platform for this command."
-
     base = _BYPASS_ENDPOINTS.get(service)
     if not base:
         return None, "Bypass endpoint not configured for this service."
@@ -263,7 +280,6 @@ async def _bp_info(cmd_name, target_url):
             return None, "Invalid URL."
     except Exception:
         return None, "Invalid URL."
-
     api_url = base if service == "transfer_it" else f"{base}{quote_plus(target_url)}"
     LOGGER.info(f"Bypassing via [{service}] -> {api_url}")
     try:
@@ -299,7 +315,6 @@ async def _bp_info(cmd_name, target_url):
         direct = data.get("url")
         if not direct:
             return None, "File Expired or File Not Found"
-
         fake = {
             "title": "N/A",
             "filesize": "N/A",
@@ -311,7 +326,6 @@ async def _bp_info(cmd_name, target_url):
         direct = data.get("url")
         if not direct:
             return None, "File Expired or Link Not Found"
-
         fake = {
             "title": "N/A",
             "filesize": "N/A",
@@ -325,33 +339,25 @@ async def _bp_info(cmd_name, target_url):
         results = data.get("results")
         if not isinstance(results, list) or not results:
             return None, "No files found."
-
         links_clean = {}
-
         for item in results:
             if not isinstance(item, dict):
                 continue
-
             fname = item.get("file_name", "File")
             fsize = item.get("file_size", "N/A")
-
             label_base = fname
             if fsize and fsize != "N/A":
                 label_base = f"{fname} ({fsize})"
-
             for link in item.get("links", []):
                 if not isinstance(link, dict):
                     continue
                 url = link.get("url")
                 tag = link.get("tag") or "Link"
-
                 if isinstance(url, str) and url.startswith(("http://", "https://")):
                     label = f"{label_base} | {tag}"
                     links_clean[label] = url
-
         if not links_clean:
             return None, "No direct links found."
-
         fake = {
             "title": "Vegamovies Files",
             "filesize": "Multiple",
@@ -359,5 +365,4 @@ async def _bp_info(cmd_name, target_url):
             "links": links_clean,
         }
         return _bp_norm(fake, service), None
-    norm = _bp_norm(data, service)
-    return norm, None
+    return _bp_norm(data, service), None
