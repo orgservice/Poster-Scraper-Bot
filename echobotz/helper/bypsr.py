@@ -194,9 +194,9 @@ EchoByRegistry = {
 CMD_TO_KEY = {
     a: k
     for k, v in {
-        "gdflix": ["gdflix", "gdf"],
+        "gdflix": ["gdflix", "gd"],
         "hubdrive": ["hubdrive", "hd"],
-        "extraflix": ["extraflix"],
+        "extraflix": ["extraflix", "exf"],
         "hubcloud": ["hubcloud", "hc"],
         "vcloud": ["vcloud", "vc"],
         "hubcdn": ["hubcdn", "hcdn"],
@@ -205,8 +205,8 @@ CMD_TO_KEY = {
         "gdrex": ["gdrex", "gdex"],
         "pixelcdn": ["pixelcdn", "pcdn"],
         "extralink": ["extralink"],
-        "luxdrive": ["luxdrive"],
-        "nexdrive": ["nexdrive", "nd"],
+        "luxdrive": ["luxdrive", "lxd"],
+        "nexdrive": ["nexdrive", "nex"],
         "transfer_it": ["transfer_it", "ti"],
         "hblinks": ["hblinks", "hbl"],
         "vegamovies": ["vegamovies", "vega"],
