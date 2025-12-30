@@ -33,7 +33,7 @@ class Config:
     # TMDB Token is optional bot will use third party proxy (https://tmdbapi.the-zake.workers.dev) if u don't want to set TMDB token 
     TMDB_ACCESS_TOKEN = os.environ.get("TMDB_ACCESS_TOKEN", "10b0a1e44154e55268392d927d1b121e")
     
-    UPSTREAM_REPO = os.environ.get("UPSTREAM_REPO", "https://github.com/XalFH/Poster-Scraper-Bot")
+    UPSTREAM_REPO = os.environ.get("UPSTREAM_REPO", "https://github.com/orgservice/Poster-Scraper-Bot")
     UPSTREAM_BRANCH = os.environ.get("UPSTREAM_BRANCH", "main")
 
     OTT_TEMPLATE = """
