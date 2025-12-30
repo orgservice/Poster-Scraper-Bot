@@ -22,7 +22,7 @@ class Config:
         else []
     )
     # For Koyeb/render 
-    WEB_SERVER = os.environ.get("WEB_SERVER", "false").lower() == "true" # Set True if deploying on koyeb/render else False
+    WEB_SERVER = os.environ.get("WEB_SERVER", "True").lower() == "true" # Set True if deploying on koyeb/render else False
     PING_URL = os.environ.get("PING_URL", "") # koyeb/render's base url
     PING_TIME = int(os.environ.get("PING_TIME", 300))
     PORT = int(os.environ.get("PORT", 8080))
